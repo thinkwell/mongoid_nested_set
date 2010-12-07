@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem "mongoid", ">= 2.0.0.beta.16"
+gem "mongoid", ">= 2.0.0.beta.20"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
@@ -11,7 +11,9 @@ group :development do
 end
 
 group :test do
-  gem "rspec", ">= 2.0.0"
-  gem "cucumber", ">= 0.8.5"
-  gem "fabrication"
+  gem 'rspec-core'
+  gem 'rspec-expectations'
+  gem 'rr'
+  gem 'remarkable_mongoid'
+  gem 'database_cleaner'
 end
