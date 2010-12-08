@@ -282,6 +282,96 @@ describe "A Mongoid::Document" do
         @nodes[:jackets].right_sibling.should == nil
       end
 
+
+      # Moves
+
+      it "cannot move a new node" do
+        n = Node.new(:name => 'Test', :root_id => 1)
+        expect {
+          n.move_to_right_of(Node.where(:name => 'Jackets').first)
+        }.to raise_error(Mongoid::Errors::MongoidError, /move.*new node/)
+      end
+
+      it "cannot move a node inside its tree" do
+        n = Node.where(:name => 'Men\'s').first
+        expect {
+          n.move_to_right_of(Node.where(:name => 'Suits').first)
+        }.to raise_error(Mongoid::Errors::MongoidError, /possible/)
+      end
+
+
+      it "adds newly created nodes to the end of the tree" do
+        Node.create(:name => 'Vests', :root_id => 1).should have_nestedset_pos(23, 24)
+
+        n = Node.new(:name => 'Test', :root_id => 1)
+        n.save
+        n.should have_nestedset_pos(25, 26)
+      end
+
+      it "can move left" do
+        @nodes[:jackets].move_left
+        @nodes[:jackets]      .should have_nestedset_pos( 4,  5)
+        @nodes[:slacks].reload.should have_nestedset_pos( 6,  7)
+        @nodes[:suits] .reload.should have_nestedset_pos( 3,  8)
+        @nodes[:jackets].depth.should == 3
+      end
+
+      it "can move right" do
+        @nodes[:slacks].move_right
+        @nodes[:slacks]        .should have_nestedset_pos( 6,  7)
+        @nodes[:jackets].reload.should have_nestedset_pos( 4,  5)
+        @nodes[:suits]  .reload.should have_nestedset_pos( 3,  8)
+        @nodes[:slacks].depth.should == 3
+      end
+
+      it "can move left of another node" do
+        @nodes[:slacks].move_to_left_of(@nodes[:skirts])
+        @nodes[:slacks]        .should have_nestedset_pos(15, 16)
+        @nodes[:skirts]        .should have_nestedset_pos(17, 18)
+        @nodes[:skirts] .reload.should have_nestedset_pos(17, 18)
+        @nodes[:dresses].reload.should have_nestedset_pos( 9, 14)
+        @nodes[:womens] .reload.should have_nestedset_pos( 8, 21)
+        @nodes[:slacks].depth.should == 2
+      end
+
+      it "can move right of another node" do
+        @nodes[:slacks].move_to_right_of(@nodes[:skirts])
+        @nodes[:slacks]        .should have_nestedset_pos(17, 18)
+        @nodes[:skirts]        .should have_nestedset_pos(15, 16)
+        @nodes[:skirts] .reload.should have_nestedset_pos(15, 16)
+        @nodes[:blouses].reload.should have_nestedset_pos(19, 20)
+        @nodes[:womens] .reload.should have_nestedset_pos( 8, 21)
+        @nodes[:slacks].depth.should == 2
+      end
+
+      it "can move as a child of another node" do
+        @nodes[:slacks].move_to_child_of(@nodes[:dresses])
+        @nodes[:slacks]        .should have_nestedset_pos(14, 15)
+        @nodes[:dresses]       .should have_nestedset_pos( 9, 16)
+        @nodes[:dresses].reload.should have_nestedset_pos( 9, 16)
+        @nodes[:gowns]  .reload.should have_nestedset_pos(10, 11)
+        @nodes[:mens]   .reload.should have_nestedset_pos( 2,  7)
+        @nodes[:slacks].depth.should == 3
+      end
+
+      it "can move to the root position" do
+        @nodes[:slacks].move_to_root.should have_nestedset_pos(1, 2)
+        @nodes[:slacks].parent_id.should be_nil
+        # TODO: What becomes of the existing root?
+      end
+
+      it "can move node with children" do
+        @nodes[:suits].move_to_child_of(@nodes[:dresses])
+        @nodes[:suits]          .should have_nestedset_pos(10, 15)
+        @nodes[:dresses]        .should have_nestedset_pos( 5, 16)
+        @nodes[:mens]    .reload.should have_nestedset_pos( 2,  3)
+        @nodes[:womens]  .reload.should have_nestedset_pos( 4, 21)
+        @nodes[:sundress].reload.should have_nestedset_pos( 8,  9)
+        @nodes[:jackets] .reload.should have_nestedset_pos(13, 14)
+        @nodes[:suits].depth.should == 3
+        @nodes[:jackets].depth.should == 4
+      end
+
     end
   end
 end

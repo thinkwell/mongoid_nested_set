@@ -72,6 +72,11 @@ module Mongoid
                 attr_protected left_field_name.intern, right_field_name.intern
               end
 
+              before_create  :set_default_left_and_right
+              before_save    :store_new_parent
+              after_save     :move_to_new_parent
+              before_destroy :destroy_descendants
+
               # no assignment to structure fields
               [left_field_name, right_field_name].each do |field|
                 module_eval <<-"end_eval", __FILE__, __LINE__
@@ -89,6 +94,7 @@ module Mongoid
               }
               scope :with_depth, proc {|level| where(:depth => level).asc(left_field_name)}
 
+              define_callbacks :move, :terminator => "result == false"
             end
           end
         end
@@ -184,6 +190,14 @@ module Mongoid
               {left_field_name => {"$gt" => parent.left}, right_field_name => {"$lt" => parent.right}}
             end
             where("$or" => conditions)
+          end
+
+          def before_move(*args, &block)
+            set_callback :move, :before, *args, &block
+          end
+
+          def after_move(*args, &block)
+            set_callback :move, :after, *args, &block
           end
         end
 
@@ -415,6 +429,140 @@ module Mongoid
             self.class.criteria.where(conditions).asc(left_field_name)
           end
 
+          def store_new_parent
+            @move_to_new_parent_id = send("#{parent_field_name}_changed?") ? parent_id : false
+            true # force callback to return true
+          end
+
+          def move_to_new_parent
+            if @move_to_new_parent_id.nil?
+              move_to_root
+            elsif @move_to_new_parent_id
+              move_to_child_of(@move_to_new_parent_id)
+            end
+          end
+
+          # on creation, set automatically lft and rgt to the end of the tree
+          def set_default_left_and_right
+            maxright = nested_set_scope.max(right_field_name) || 0
+            self[left_field_name] = maxright + 1
+            self[right_field_name] = maxright + 2
+          end
+
+          # Prunes a branch off of the tree, shifting all of the elements on the right
+          # back to the left so the counts still work
+          def destroy_descendants
+            # TODO
+          end
+
+          # reload left, right, and parent
+          def reload_nested_set
+            reload
+          end
+
+          def move_to(target, position)
+            raise Mongoid::Errors::MongoidError, "You cannot move a new node" if self.new_record?
+
+            res = run_callbacks :move do
+
+              # No transaction support in MongoDB.
+              # ACID is not guaranteed
+              # TODO
+
+              if target.is_a? self.class
+                target.reload_nested_set
+              elsif position != :root
+                # load object if node is not an object
+                target = nested_set_scope.find(target)
+              end
+              self.reload_nested_set
+
+              unless position == :root || move_possible?(target)
+                raise Mongoid::Errors::MongoidError, "Impossible move, target node cannot be inside moved tree."
+              end
+
+              bound = case position
+                when :child; target[right_field_name]
+                when :left;  target[left_field_name]
+                when :right; target[right_field_name] + 1
+                when :root;  1
+                else raise Mongoid::Errors::MongoidError, "Position should be :child, :left, :right or :root ('#{position}' received)."
+              end
+
+              if bound > self[right_field_name]
+                bound = bound - 1
+                other_bound = self[right_field_name] + 1
+              else
+                other_bound = self[left_field_name] - 1
+              end
+
+              # there would be no change
+              return self if bound == self[right_field_name] || bound == self[left_field_name]
+
+              # we have defined the boundaries of two non-overlapping intervals,
+              # so sorting puts both the intervals and their boundaries in order
+              a, b, c, d = [self[left_field_name], self[right_field_name], bound, other_bound].sort
+
+              new_parent = case position
+                when :child; target.id
+                when :root;  nil
+                else         target[parent_field_name]
+              end
+
+              # TODO: Worst case O(n) queries, improve?
+              # MongoDB 1.9 may allow javascript in updates: http://jira.mongodb.org/browse/SERVER-458
+              nested_set_scope.only(left_field_name, right_field_name, parent_field_name).remove_order_by.each do |node|
+                updates = {}
+                if (a..b).include? node.left
+                  updates[left_field_name] = node.left + d - b
+                elsif (c..d).include? node.left
+                  updates[left_field_name] = node.left + a - c
+                end
+
+                if (a..b).include? node.right
+                  updates[right_field_name] = node.right + d - b
+                elsif (c..d).include? node.right
+                  updates[right_field_name] = node.right + a - c
+                end
+
+                updates[parent_field_name] = new_parent if self.id == node.id
+
+                node.class.collection.update(
+                  {:_id => node.id },
+                  {"$set" => updates},
+                  {:safe => true}
+                ) unless updates.empty?
+              end
+
+              self.reload_nested_set
+              self.update_self_and_descendants_depth
+              target.reload_nested_set if target
+            end
+            self
+          end
+
+          # Update cached level attribute
+          def update_depth
+            if depth?
+              self.update_attributes(:depth => level)
+            end
+            self
+          end
+
+          # Update cached level attribute for self and descendants
+          def update_self_and_descendants_depth
+            if depth?
+              self.class.each_with_level(self_and_descendants) do |node, level|
+                node.class.collection.update(
+                  {:_id => node.id},
+                  {"$set" => {:depth => level}},
+                  {:safe => true}
+                ) unless node.depth == level
+              end
+              self.reload
+            end
+            self
+          end
         end
       end # Base
     end # NestedSet
