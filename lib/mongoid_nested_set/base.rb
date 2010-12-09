@@ -109,31 +109,50 @@ module Mongoid
             roots.first
           end
 
+          # Warning: Very expensive!  Do not use unless you know what you are doing.
+          # This method is only useful for determining if the entire tree is valid
           def valid?
             left_and_rights_valid? && no_duplicates_for_fields? && all_roots_valid?
           end
 
+          # Warning: Very expensive!  Do not use unless you know what you are doing.
           def left_and_rights_valid?
-            # TODO
-            true
+            all.detect { |node|
+              node.send(left_field_name).nil? ||
+              node.send(right_field_name).nil? ||
+              node.send(left_field_name) >= node.send(right_field_name) ||
+              !node.parent.nil? && (
+                node.send(left_field_name) <= node.parent.send(left_field_name) ||
+                node.send(right_field_name) >= node.parent.send(right_field_name)
+              )
+            }.nil?
           end
 
+          # Warning: Very expensive!  Do not use unless you know what you are doing.
           def no_duplicates_for_fields?
-            # TODO
-            true
+            roots.group_by{|record| scope_field_names.collect{|field| record.send(field.to_sym)}}.all? do |scope, grouped_roots|
+              [left_field_name, right_field_name].all? do |field|
+                grouped_roots.first.nested_set_scope.only(field).aggregate.all? {|c| c['count'] == 1}
+              end
+            end
           end
 
           # Wrapper for each_root_valid? that can deal with scope
+          # Warning: Very expensive!  Do not use unless you know what you are doing.
           def all_roots_valid?
-            # TODO
-            true
+            if acts_as_nested_set_options[:scope]
+              roots.group_by{|record| scope_field_names.collect{|field| record.send(field.to_sym)}}.all? do |scope, grouped_roots|
+                each_root_valid?(grouped_roots)
+              end
+            else
+              each_root_valid?(roots)
+            end
           end
 
           def each_root_valid?(roots_to_validate)
-            left = right = 0
+            right = 0
             roots_to_validate.all? do |root|
-              (root.left > left && root.right > right).tap do
-                left = root.left
+              (root.left > right && root.right > right).tap do
                 right = root.right
               end
             end
@@ -218,6 +237,10 @@ module Mongoid
             acts_as_nested_set_options[:parent_field]
           end
 
+          def scope_field_names
+            Array(acts_as_nested_set_options[:scope])
+          end
+
           def quoted_left_field_name
             # TODO
             left_field_name
@@ -231,6 +254,11 @@ module Mongoid
           def quoted_parent_field_name
             # TODO
             parent_field_name
+          end
+
+          def quoted_scope_field_names
+            # TODO
+            scope_field_names
           end
         end
 
@@ -415,12 +443,6 @@ module Mongoid
             end.join("\n")
           end
 
-        protected
-
-          def without_self(scope)
-            scope.where(:_id.ne => self.id)
-          end
-
           # All nested set queries should use this nested_set_scope, which performs finds
           # using the :scope declared in the acts_as_nested_set declaration
           def nested_set_scope
@@ -429,6 +451,12 @@ module Mongoid
               conditions.merge attr => self[attr]
             end unless scopes.empty?
             self.class.criteria.where(conditions).asc(left_field_name)
+          end
+
+        protected
+
+          def without_self(scope)
+            scope.where(:_id.ne => self.id)
           end
 
           def store_new_parent

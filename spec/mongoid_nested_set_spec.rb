@@ -80,9 +80,52 @@ describe "A Mongoid::Document" do
   end
 
 
+  context "that acts as an un-scoped nested set" do
 
-  context "that acts as a nested set" do
+    context "in a tree" do
+      before(:each) do
+        @nodes = persist_nodes(create_clothing_nodes(UnscopedNode))
+      end
 
+      it "can detect if roots are valid" do
+        UnscopedNode.should be_all_roots_valid
+
+        persist_nodes(UnscopedNode.new(:name => 'Test').test_set_attributes(:lft => 20, :rgt => 30, :parent_id=>nil))
+        UnscopedNode.should_not be_all_roots_valid
+      end
+
+      it "can detect if left and rights are valid" do
+        UnscopedNode.should be_left_and_rights_valid
+
+        # left > right
+        n = UnscopedNode.new(:name => 'Test').test_set_attributes(:root_id => 1, :lft => 6, :rgt => 5, :parent_id=>@nodes[:suits].id)
+        persist_nodes(n)
+        UnscopedNode.should_not be_left_and_rights_valid
+
+        # left == right
+        persist_nodes(n.test_set_attributes(:rgt => 6))
+        UnscopedNode.should_not be_left_and_rights_valid
+
+        # Overlaps parent
+        persist_nodes(n.test_set_attributes(:rgt => 8))
+        UnscopedNode.should_not be_left_and_rights_valid
+      end
+
+      it "can detect duplicate left and right values" do
+        UnscopedNode.should be_no_duplicates_for_fields
+
+        n = UnscopedNode.new(:name => 'Test').test_set_attributes(:root_id => 1, :lft => 6, :rgt => 25, :parent_id=>@nodes[:suits].id)
+        persist_nodes(n)
+        UnscopedNode.should_not be_no_duplicates_for_fields
+
+        persist_nodes(n.test_set_attributes(:lft => 5, :rgt => 7, :parent_id=>@nodes[:suits].id))
+        UnscopedNode.should_not be_no_duplicates_for_fields
+      end
+    end
+  end
+
+
+  context "that acts as a scoped nested set" do
 
     # Adds fields
 
@@ -308,6 +351,41 @@ describe "A Mongoid::Document" do
       it "fetches its first sibling to the right" do
         @nodes[:skirts].right_sibling.name.should == 'Blouses'
         @nodes[:jackets].right_sibling.should == nil
+      end
+
+      it "can detect if roots are valid" do
+        Node.should be_all_roots_valid
+
+        persist_nodes(Node.new(:name => 'Test').test_set_attributes(:root_id => 1, :lft => 20, :rgt => 30, :parent_id=>nil))
+        Node.should_not be_all_roots_valid
+      end
+
+      it "can detect if left and rights are valid" do
+        Node.should be_left_and_rights_valid
+
+        # left > right
+        n = Node.new(:name => 'Test').test_set_attributes(:root_id => 1, :lft => 6, :rgt => 5, :parent_id=>@nodes[:suits].id)
+        persist_nodes(n)
+        Node.should_not be_left_and_rights_valid
+
+        # left == right
+        persist_nodes(n.test_set_attributes(:rgt => 6))
+        Node.should_not be_left_and_rights_valid
+
+        # Overlaps parent
+        persist_nodes(n.test_set_attributes(:rgt => 8))
+        Node.should_not be_left_and_rights_valid
+      end
+
+      it "can detect duplicate left and right values" do
+        Node.should be_no_duplicates_for_fields
+
+        n = Node.new(:name => 'Test').test_set_attributes(:root_id => 1, :lft => 6, :rgt => 25, :parent_id=>@nodes[:suits].id)
+        persist_nodes(n)
+        Node.should_not be_no_duplicates_for_fields
+
+        persist_nodes(n.test_set_attributes(:lft => 5, :rgt => 7, :parent_id=>@nodes[:suits].id))
+        Node.should_not be_no_duplicates_for_fields
       end
 
 
