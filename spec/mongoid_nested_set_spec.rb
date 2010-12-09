@@ -400,6 +400,29 @@ describe "A Mongoid::Document" do
         @nodes[:jackets].depth.should == 4
       end
 
+      context "with dependent=delete_all" do
+        it "deletes descendants when destroyed" do
+          @nodes[:mens].destroy
+          @nodes[:clothing].reload.should have_nestedset_pos( 1, 14)
+          @nodes[:womens]  .reload.should have_nestedset_pos( 2, 13)
+          Node.where(:name => 'Men\'s').count.should == 0
+          Node.where(:name => 'Suits').count.should == 0
+          Node.where(:name => 'Slacks').count.should == 0
+        end
+      end
+
+      context "with dependent=destroy" do
+        it "deletes descendants when destroyed" do
+          Node.test_set_dependent_option :destroy
+          @nodes[:mens].destroy
+          @nodes[:clothing].reload.should have_nestedset_pos( 1, 14)
+          @nodes[:womens]  .reload.should have_nestedset_pos( 2, 13)
+          Node.where(:name => 'Men\'s').count.should == 0
+          Node.where(:name => 'Suits').count.should == 0
+          Node.where(:name => 'Slacks').count.should == 0
+        end
+      end
+
     end
 
   end

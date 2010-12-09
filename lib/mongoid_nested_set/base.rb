@@ -68,6 +68,8 @@ module Mongoid
               references_many :children, :class_name => self.name, :foreign_key => parent_field_name, :inverse_of => :parent
               referenced_in   :parent,   :class_name => self.name, :foreign_key => parent_field_name
 
+              attr_accessor :skip_before_destroy
+
               if accessible_attributes.blank?
                 attr_protected left_field_name.intern, right_field_name.intern
               end
@@ -453,7 +455,33 @@ module Mongoid
           # Prunes a branch off of the tree, shifting all of the elements on the right
           # back to the left so the counts still work
           def destroy_descendants
-            # TODO
+            return if right.nil? || left.nil? || skip_before_destroy
+
+            if acts_as_nested_set_options[:dependent] == :destroy
+              descendants.each do |model|
+                model.skip_before_destroy = true
+                model.destroy
+              end
+            else
+              c = nested_set_scope.fuse(:where => {left_field_name => {"$gt" => left}, right_field_name => {"$lt" => right}})
+              self.class.delete_all(:conditions => c.selector)
+            end
+
+            # update lefts and rights for remaining nodes
+            diff = right - left + 1
+            self.class.collection.update(
+              nested_set_scope.fuse(:where => {left_field_name => {"$gt" => right}}).selector,
+              {"$inc" => { left_field_name => -diff }},
+              {:safe => true, :multi => true}
+            )
+            self.class.collection.update(
+              nested_set_scope.fuse(:where => {right_field_name => {"$gt" => right}}).selector,
+              {"$inc" => { right_field_name => -diff }},
+              {:safe => true, :multi => true}
+            )
+
+            # Don't allow multiple calls to destroy to corrupt the set
+            self.skip_before_destroy = true
           end
 
           # reload left, right, and parent
