@@ -6,7 +6,38 @@ module Mongoid
           base.extend(SingletonMethods)
         end
 
+        # This acts provides Nested Set functionality.  Nested Set is a smart way to implement
+        # an _ordered_ tree, with the added feature that you can select the children and all of
+        # their descendants with a single query.  The drawback is that insertion or move need
+        # multiple queries.  But everything is done here by this module!
+        #
+        # Nested sets are appropriate each time you want either an ordered tree (menus,
+        # commercial categories) or an efficient way of querying big trees (threaded posts).
+        #
+        # == API
+        #
+        # Method names are aligned with acts_as_tree as much as possible to make replacement
+        # from one by another easier.
+        #
+        #   item.children.create(:name => 'child1')
+        #
         module SingletonMethods
+          # Configuration options are:
+          #
+          # * +:parent_field+ - field name to use for keeping the parent id (default: parent_id)
+          # * +:left_field+ - field name for left boundary data, default 'lft'
+          # * +:right_field+ - field name for right boundary data, default 'rgt'
+          # * +:scope+ - restricts what is to be considered a list.  Given a symbol, it'll attach
+          #   "_id" (if it hasn't been already) and use that as the foreign key restriction.  You
+          #   can also pass an array to scope by multiple attributes
+          # * +:dependent+ - behavior for cascading destroy.  If set to :destroy, all the child
+          #   objects are destroyed alongside this object by calling their destroy method.  If set
+          #   to :delete_all (default), all the child objects are deleted without calling their
+          #   destroy method.
+          #
+          # See Mongoid::Acts::NestedSet::ClassMethods for a list of class methods and
+          # Mongoid::Acts::NestedSet::InstanceMethods for a list of instance methods added to
+          # acts_as_nested_set models
           def acts_as_nested_set(options = {})
             options = {
               :parent_field => 'parent_id',
@@ -34,7 +65,7 @@ module Mongoid
               field right_field_name, :type => Integer
               field :depth, :type => Integer
 
-              references_many :children, :class_name => self.name, :inverse_of => :parent
+              references_many :children, :class_name => self.name, :foreign_key => parent_field_name, :inverse_of => :parent
               referenced_in   :parent,   :class_name => self.name, :foreign_key => parent_field_name
 
               if accessible_attributes.blank?
