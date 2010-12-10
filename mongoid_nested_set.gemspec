@@ -5,16 +5,16 @@
 
 Gem::Specification.new do |s|
   s.name = %q{mongoid_nested_set}
-  s.version = "0.0.1"
+  s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brandon Turner"]
-  s.date = %q{2010-12-06}
+  s.date = %q{2010-12-10}
   s.description = %q{Fully featured tree implementation for Mongoid using the nested set model}
   s.email = %q{bturner@bltweb.net}
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.rdoc"
+    "README.markdown"
   ]
   s.files = [
     ".document",
@@ -22,25 +22,31 @@ Gem::Specification.new do |s|
     "Gemfile",
     "Gemfile.lock",
     "LICENSE.txt",
-    "README.rdoc",
+    "README.markdown",
     "Rakefile",
+    "VERSION",
     "lib/mongoid_nested_set.rb",
     "lib/mongoid_nested_set/base.rb",
+    "mongoid_nested_set.gemspec",
+    "spec/matchers/nestedset_pos.rb",
     "spec/models/node.rb",
     "spec/models/node_without_nested_set.rb",
     "spec/models/renamed_fields.rb",
+    "spec/models/unscoped_node.rb",
     "spec/mongoid_nested_set_spec.rb",
     "spec/spec_helper.rb"
   ]
-  s.homepage = %q{http://github.com/blt04/mongoid_nested_set}
+  s.homepage = %q{http://github.com/thinkwell/mongoid_nested_set}
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{Nested set based tree implementation for Mongoid}
   s.test_files = [
+    "spec/matchers/nestedset_pos.rb",
     "spec/models/node.rb",
     "spec/models/node_without_nested_set.rb",
     "spec/models/renamed_fields.rb",
+    "spec/models/unscoped_node.rb",
     "spec/mongoid_nested_set_spec.rb",
     "spec/spec_helper.rb"
   ]
@@ -54,17 +60,23 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.5.1"])
       s.add_development_dependency(%q<rcov>, [">= 0"])
+      s.add_development_dependency(%q<rspec-core>, [">= 0"])
+      s.add_runtime_dependency(%q<mongoid>, [">= 2.0.0.beta.20"])
     else
       s.add_dependency(%q<mongoid>, [">= 2.0.0.beta.20"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.5.1"])
       s.add_dependency(%q<rcov>, [">= 0"])
+      s.add_dependency(%q<rspec-core>, [">= 0"])
+      s.add_dependency(%q<mongoid>, [">= 2.0.0.beta.20"])
     end
   else
     s.add_dependency(%q<mongoid>, [">= 2.0.0.beta.20"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.5.1"])
     s.add_dependency(%q<rcov>, [">= 0"])
+    s.add_dependency(%q<rspec-core>, [">= 0"])
+    s.add_dependency(%q<mongoid>, [">= 2.0.0.beta.20"])
   end
 end
 
