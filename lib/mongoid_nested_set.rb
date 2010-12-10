@@ -19,8 +19,8 @@ require 'mongoid_nested_set/remove_order_by'
 module Mongoid
   module Acts
     module NestedSet
-      require 'mongoid_nested_set/act_as'
-      autoload :Base,       'mongoid_nested_set/base'
+      require 'mongoid_nested_set/base'
+      autoload :Document,   'mongoid_nested_set/document'
       autoload :Fields,     'mongoid_nested_set/fields'
       autoload :Rebuild,    'mongoid_nested_set/rebuild'
       autoload :Relations,  'mongoid_nested_set/relations'
@@ -28,7 +28,7 @@ module Mongoid
       autoload :Validation, 'mongoid_nested_set/validation'
 
       def self.included(base)
-        base.extend(ActAs)
+        base.extend(Base)
       end
     end
   end
@@ -36,4 +36,4 @@ end
 
 
 # Enable the acts_as_nested_set method
-Mongoid::Document::ClassMethods.send(:include, Mongoid::Acts::NestedSet::ActAs)
+Mongoid::Document::ClassMethods.send(:include, Mongoid::Acts::NestedSet::Base)
