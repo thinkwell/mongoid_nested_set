@@ -205,6 +205,34 @@ describe "A Mongoid::Document" do
     end
 
 
+    context "in an empty tree" do
+
+      it "can create a root node" do
+        root = Node.create(:name => 'Root Category')
+        root.should have_nestedset_pos(1, 2)
+        root.depth.should == 0
+      end
+
+      it "can create a child node via children.create" do
+        root = Node.create(:name => 'Root Category')
+        child = root.children.create(:name => 'Child Category')
+        child.should have_nestedset_pos(2, 3)
+        child.parent_id.should == root.id
+        child.depth.should == 1
+        root.reload.should have_nestedset_pos(1, 4)
+      end
+
+      it "can create a child node via children<<" do
+        root = Node.create(:name => 'Root Category')
+        child = Node.create(:name => 'Child Category')
+        root.children << child
+        child.parent_id.should == root.id
+        child.should have_nestedset_pos(2, 3)
+        child.depth.should == 1
+        root.reload.should have_nestedset_pos(1, 4)
+      end
+
+    end
 
 
     context "in a tree" do
@@ -373,5 +401,6 @@ describe "A Mongoid::Document" do
       end
 
     end
+
   end
 end

@@ -447,6 +447,7 @@ module Mongoid
             maxright = nested_set_scope.max(right_field_name) || 0
             self[left_field_name] = maxright + 1
             self[right_field_name] = maxright + 2
+            self[:depth] = 0
           end
 
           # Prunes a branch off of the tree, shifting all of the elements on the right
@@ -473,7 +474,7 @@ module Mongoid
                 target.reload_nested_set
               elsif position != :root
                 # load object if node is not an object
-                target = nested_set_scope.find(target)
+                target = nested_set_scope.find(target).first
               end
               self.reload_nested_set
 
