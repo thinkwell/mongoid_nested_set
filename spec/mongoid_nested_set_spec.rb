@@ -503,5 +503,27 @@ describe "A Mongoid::Document" do
 
     end
 
+
+    context "in an adjaceny list tree" do
+      before(:each) do
+        @nodes = create_clothing_nodes(Node)
+        @nodes.each_value { |node| node.test_set_attributes(:rgt => nil) }
+        persist_nodes(@nodes)
+      end
+
+      it "can rebuild nested set properties" do
+        Node.rebuild!
+        root = Node.root
+        root.should be_a(Node)
+        root.name.should == 'Clothing'
+
+        @nodes[:clothing].reload.should have_nestedset_pos( 1, 22)
+        @nodes[:mens]    .reload.should have_nestedset_pos( 2,  9)
+        @nodes[:womens]  .reload.should have_nestedset_pos(10, 21)
+        @nodes[:suits]   .reload.should have_nestedset_pos( 3,  8)
+        @nodes[:skirts]  .reload.should have_nestedset_pos(17, 18)
+      end
+
+    end
   end
 end
