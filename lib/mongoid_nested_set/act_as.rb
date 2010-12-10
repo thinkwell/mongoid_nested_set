@@ -35,10 +35,10 @@ module Mongoid::Acts::NestedSet
 
       unless self.is_a?(Base::ClassMethods)
         include Comparable
-        include Base::Fields
+        include Fields
         include Base::InstanceMethods
 
-        extend Base::Fields
+        extend Fields
         extend Base::ClassMethods
 
         field left_field_name, :type => Integer

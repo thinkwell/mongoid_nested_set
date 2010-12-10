@@ -20,7 +20,12 @@ module Mongoid
   module Acts
     module NestedSet
       require 'mongoid_nested_set/act_as'
-      autoload :Base, 'mongoid_nested_set/base'
+      autoload :Base,       'mongoid_nested_set/base'
+      autoload :Fields,     'mongoid_nested_set/fields'
+      autoload :Rebuild,    'mongoid_nested_set/rebuild'
+      autoload :Relations,  'mongoid_nested_set/relations'
+      autoload :Update,     'mongoid_nested_set/update'
+      autoload :Validation, 'mongoid_nested_set/validation'
 
       def self.included(base)
         base.extend(ActAs)
