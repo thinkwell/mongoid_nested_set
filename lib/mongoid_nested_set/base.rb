@@ -94,7 +94,9 @@ module Mongoid
               scope :leaves, lambda {
                 where("this.#{quoted_right_field_name} - this.#{quoted_left_field_name} == 1").asc(left_field_name)
               }
-              scope :with_depth, proc {|level| where(:depth => level).asc(left_field_name)}
+              scope :with_depth, lambda { |level|
+                where(:depth => level).asc(left_field_name)
+              }
 
               define_callbacks :move, :terminator => "result == false"
             end
