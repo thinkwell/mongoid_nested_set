@@ -85,7 +85,7 @@ module Mongoid::Acts::NestedSet
           target.reload_nested_set
         elsif position != :root
           # load object if node is not an object
-          target = nested_set_scope.find(target).first
+          target = nested_set_scope.where(:_id => target).first
         end
         self.reload_nested_set
 
