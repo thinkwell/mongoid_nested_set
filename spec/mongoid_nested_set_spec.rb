@@ -445,6 +445,12 @@ describe "A Mongoid::Document" do
         }.to raise_error(Mongoid::Errors::MongoidError, /possible/)
       end
 
+      it "cannot move a node to a non-existent target" do
+        @nodes[:mens].parent_id = BSON::ObjectId.new
+        expect {
+          @nodes[:mens].save
+        }.to raise_error(Mongoid::Errors::MongoidError, /possible.*(exist|found)/)
+      end
 
       it "adds newly created nodes to the end of the tree" do
         Node.create(:name => 'Vests', :root_id => 1).should have_nestedset_pos(23, 24)

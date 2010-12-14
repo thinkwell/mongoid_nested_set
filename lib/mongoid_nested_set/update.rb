@@ -89,6 +89,10 @@ module Mongoid::Acts::NestedSet
         end
         self.reload_nested_set
 
+        unless position == :root || target
+          raise Mongoid::Errors::MongoidError, "Impossible move, target node cannot be found."
+        end
+
         unless position == :root || move_possible?(target)
           raise Mongoid::Errors::MongoidError, "Impossible move, target node cannot be inside moved tree."
         end
