@@ -275,6 +275,24 @@ describe "A Mongoid::Document" do
         root.reload.should have_nestedset_pos(1, 4)
       end
 
+      it "can create a child node with parent pre-assigned" do
+        root = Node.create(:name => 'Root Category')
+        child = Node.create(:name => 'Child Category', :parent => root)
+        child.should have_nestedset_pos(2, 3)
+        child.parent_id.should == root.id
+        child.depth.should == 1
+        root.reload.should have_nestedset_pos(1, 4)
+      end
+
+      it "can create a child node with parent id pre-assigned" do
+        root = Node.create(:name => 'Root Category')
+        child = Node.create(:name => 'Child Category', :parent_id => root.id)
+        child.should have_nestedset_pos(2, 3)
+        child.parent_id.should == root.id
+        child.depth.should == 1
+        root.reload.should have_nestedset_pos(1, 4)
+      end
+
     end
 
 

@@ -49,7 +49,7 @@ module Mongoid::Acts::NestedSet
     protected
 
     def store_new_parent
-      @move_to_new_parent_id = send("#{parent_field_name}_changed?") ? parent_id : false
+      @move_to_new_parent_id = ((self.new_record? && parent_id) || send("#{parent_field_name}_changed?")) ? parent_id : false
       true # force callback to return true
     end
 
