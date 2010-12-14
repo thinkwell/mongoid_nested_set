@@ -293,6 +293,28 @@ describe "A Mongoid::Document" do
         root.reload.should have_nestedset_pos(1, 4)
       end
 
+      it "can change a new node's parent before saving" do
+        root = Node.create(:name => 'Root Category')
+        child = Node.new(:name => 'Child Category')
+        child.parent = root
+        child.save
+        child.should have_nestedset_pos(2, 3)
+        child.parent_id.should == root.id
+        child.depth.should == 1
+        root.reload.should have_nestedset_pos(1, 4)
+      end
+
+      it "can change a new node's parent id before saving" do
+        root = Node.create(:name => 'Root Category')
+        child = Node.new(:name => 'Child Category')
+        child.parent_id = root.id
+        child.save
+        child.should have_nestedset_pos(2, 3)
+        child.parent_id.should == root.id
+        child.depth.should == 1
+        root.reload.should have_nestedset_pos(1, 4)
+      end
+
     end
 
 
@@ -472,6 +494,16 @@ describe "A Mongoid::Document" do
         @nodes[:slacks].move_to_child_of(@nodes[:dresses])
         @nodes[:slacks]        .should have_nestedset_pos(14, 15)
         @nodes[:dresses]       .should have_nestedset_pos( 9, 16)
+        @nodes[:dresses].reload.should have_nestedset_pos( 9, 16)
+        @nodes[:gowns]  .reload.should have_nestedset_pos(10, 11)
+        @nodes[:mens]   .reload.should have_nestedset_pos( 2,  7)
+        @nodes[:slacks].depth.should == 3
+      end
+
+      it "can change it's parent id" do
+        @nodes[:slacks].parent_id = @nodes[:dresses].id
+        @nodes[:slacks].save
+        @nodes[:slacks] .reload.should have_nestedset_pos(14, 15)
         @nodes[:dresses].reload.should have_nestedset_pos( 9, 16)
         @nodes[:gowns]  .reload.should have_nestedset_pos(10, 11)
         @nodes[:mens]   .reload.should have_nestedset_pos( 2,  7)
