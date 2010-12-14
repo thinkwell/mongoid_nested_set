@@ -151,7 +151,7 @@ module Mongoid::Acts::NestedSet
       # Redefine to act like active record
       def ==(comparison_object)
         comparison_object.equal?(self) ||
-          (comparison_object.instance_of?(self.class) &&
+          (comparison_object.instance_of?(scope_class) &&
            comparison_object.id == id &&
            !comparison_object.new_record?)
       end
@@ -179,7 +179,7 @@ module Mongoid::Acts::NestedSet
         conditions = scopes.inject({}) do |conditions,attr|
           conditions.merge attr => self[attr]
         end unless scopes.empty?
-        self.class.criteria.where(conditions).asc(left_field_name)
+        scope_class.criteria.where(conditions).asc(left_field_name)
       end
 
 

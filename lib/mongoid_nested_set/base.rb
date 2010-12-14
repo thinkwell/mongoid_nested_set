@@ -14,6 +14,7 @@ module Mongoid::Acts::NestedSet
     #   objects are destroyed alongside this object by calling their destroy method.  If set
     #   to :delete_all (default), all the child objects are deleted without calling their
     #   destroy method.
+    # * +:klass+ - class to use for queries (defaults to self)
     #
     # See Mongoid::Acts::NestedSet::ClassMethods for a list of class methods and
     # Mongoid::Acts::NestedSet::InstanceMethods for a list of instance methods added to
@@ -24,6 +25,7 @@ module Mongoid::Acts::NestedSet
         :left_field => 'lft',
         :right_field => 'rgt',
         :dependent => :delete_all, # or :destroy
+        :klass => self,
       }.merge(options)
 
       if options[:scope].is_a?(Symbol) && options[:scope].to_s !~ /_id$/

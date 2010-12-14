@@ -526,4 +526,29 @@ describe "A Mongoid::Document" do
 
     end
   end
+
+
+  context "that acts as a nested set with inheritance" do
+    def create_shape_nodes
+      nodes = {}
+      nodes[:root] = SquareNode.new.test_set_attributes('name' => 'Root', 'lft' =>  1, 'rgt' => 12, 'depth' => 0, 'parent_id' => nil)
+      nodes[:c1]   = SquareNode.new.test_set_attributes('name' => '1',    'lft' =>  2, 'rgt' =>  7, 'depth' => 1, 'parent_id' => nodes[:root].id)
+      nodes[:c2]   = SquareNode.new.test_set_attributes('name' => '2',    'lft' =>  8, 'rgt' =>  9, 'depth' => 1, 'parent_id' => nodes[:root].id)
+      nodes[:c3]   = CircleNode.new.test_set_attributes('name' => '3',    'lft' => 10, 'rgt' => 11, 'depth' => 1, 'parent_id' => nodes[:root].id)
+      nodes[:c11]  = CircleNode.new.test_set_attributes('name' => '1.1',  'lft' =>  3, 'rgt' =>  4, 'depth' => 2, 'parent_id' => nodes[:c1].id)
+      nodes[:c12]  = SquareNode.new.test_set_attributes('name' => '1.2',  'lft' =>  5, 'rgt' =>  6, 'depth' => 2, 'parent_id' => nodes[:c1].id)
+      nodes
+    end
+
+    context "in a tree" do
+      before(:each) do
+        @nodes = create_shape_nodes
+        persist_nodes(@nodes)
+      end
+
+      it "fetches self and descendants in order" do
+        @nodes[:root].self_and_descendants.map {|e| e.name}.should == %w[Root 1 1.1 1.2 2 3]
+      end
+    end
+  end
 end

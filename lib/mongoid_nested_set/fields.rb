@@ -22,6 +22,10 @@ module Mongoid::Acts::NestedSet
       Array(acts_as_nested_set_options[:scope])
     end
 
+    def scope_class
+      acts_as_nested_set_options[:klass]
+    end
+
 
     def quoted_left_field_name
       # TODO

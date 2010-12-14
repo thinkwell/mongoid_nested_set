@@ -81,7 +81,7 @@ module Mongoid::Acts::NestedSet
         # ACID is not guaranteed
         # TODO
 
-        if target.is_a? self.class
+        if target.is_a? scope_class
           target.reload_nested_set
         elsif position != :root
           # load object if node is not an object
@@ -166,7 +166,7 @@ module Mongoid::Acts::NestedSet
     # Update cached level attribute for self and descendants
     def update_self_and_descendants_depth
       if depth?
-        self.class.each_with_level(self_and_descendants) do |node, level|
+        scope_class.each_with_level(self_and_descendants) do |node, level|
           node.class.collection.update(
             {:_id => node.id},
             {"$set" => {:depth => level}},
@@ -191,17 +191,17 @@ module Mongoid::Acts::NestedSet
         end
       else
         c = nested_set_scope.fuse(:where => {left_field_name => {"$gt" => left}, right_field_name => {"$lt" => right}})
-        self.class.delete_all(:conditions => c.selector)
+        scope_class.delete_all(:conditions => c.selector)
       end
 
       # update lefts and rights for remaining nodes
       diff = right - left + 1
-      self.class.collection.update(
+      scope_class.collection.update(
         nested_set_scope.fuse(:where => {left_field_name => {"$gt" => right}}).selector,
         {"$inc" => { left_field_name => -diff }},
         {:safe => true, :multi => true}
       )
-      self.class.collection.update(
+      scope_class.collection.update(
         nested_set_scope.fuse(:where => {right_field_name => {"$gt" => right}}).selector,
         {"$inc" => { right_field_name => -diff }},
         {:safe => true, :multi => true}
