@@ -517,9 +517,33 @@ describe "A Mongoid::Document" do
       end
 
       it "can move to the root position" do
-        @nodes[:slacks].move_to_root.should have_nestedset_pos(1, 2)
-        @nodes[:slacks].parent_id.should be_nil
-        # TODO: What becomes of the existing root?
+        @nodes[:suits].move_to_root
+        @nodes[:suits]          .should be_root
+        @nodes[:suits]          .should have_nestedset_pos( 1,  6)
+        @nodes[:jackets] .reload.should have_nestedset_pos( 4,  5)
+        @nodes[:clothing].reload.should have_nestedset_pos( 7, 22)
+        @nodes[:mens]    .reload.should have_nestedset_pos( 8,  9)
+        @nodes[:womens]  .reload.should have_nestedset_pos(10, 21)
+      end
+
+      it "can move to the left of root" do
+        @nodes[:suits].move_to_left_of(@nodes[:clothing])
+        @nodes[:suits]          .should be_root
+        @nodes[:suits]          .should have_nestedset_pos( 1,  6)
+        @nodes[:jackets] .reload.should have_nestedset_pos( 4,  5)
+        @nodes[:clothing].reload.should have_nestedset_pos( 7, 22)
+        @nodes[:mens]    .reload.should have_nestedset_pos( 8,  9)
+        @nodes[:womens]  .reload.should have_nestedset_pos(10, 21)
+      end
+
+      it "can move to the right of root" do
+        @nodes[:suits].move_to_right_of(@nodes[:clothing])
+        @nodes[:suits]          .should be_root
+        @nodes[:suits]          .should have_nestedset_pos(17, 22)
+        @nodes[:jackets] .reload.should have_nestedset_pos(20, 21)
+        @nodes[:clothing].reload.should have_nestedset_pos( 1, 16)
+        @nodes[:mens]    .reload.should have_nestedset_pos( 2,  3)
+        @nodes[:womens]  .reload.should have_nestedset_pos( 4, 15)
       end
 
       it "can move node with children" do
