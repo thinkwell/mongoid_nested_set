@@ -119,6 +119,7 @@ module Mongoid::Acts::NestedSet
         # so sorting puts both the intervals and their boundaries in order
         a, b, c, d = [self[left_field_name], self[right_field_name], bound, other_bound].sort
 
+        old_parent = self[parent_field_name]
         new_parent = case position
                      when :child; target.id
                      when :root;  nil
@@ -152,6 +153,19 @@ module Mongoid::Acts::NestedSet
 
         self.reload_nested_set
         self.update_self_and_descendants_depth
+
+        if outline_numbering?
+          if old_parent && old_parent != new_parent
+            scope_class.where(:_id => old_parent).first.update_descendants_outline_number
+          end
+          if new_parent
+            scope_class.where(:_id => new_parent).first.update_descendants_outline_number
+          else
+            update_self_and_descendants_outline_number
+          end
+          self.reload_nested_set
+        end
+
         target.reload_nested_set if target
       end
       self

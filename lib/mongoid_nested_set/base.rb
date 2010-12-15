@@ -7,6 +7,9 @@ module Mongoid::Acts::NestedSet
     # * +:parent_field+ - field name to use for keeping the parent id (default: parent_id)
     # * +:left_field+ - field name for left boundary data, default 'lft'
     # * +:right_field+ - field name for right boundary data, default 'rgt'
+    # * +:outline_number_field+ - field name for the number field, default nil.  If set,
+    #   the value will be used as a field name to keep track of each node's
+    #   "outline number" (e.g. 1.2.5).
     # * +:scope+ - restricts what is to be considered a list.  Given a symbol, it'll attach
     #   "_id" (if it hasn't been already) and use that as the foreign key restriction.  You
     #   can also pass an array to scope by multiple attributes
@@ -24,6 +27,7 @@ module Mongoid::Acts::NestedSet
         :parent_field => 'parent_id',
         :left_field => 'lft',
         :right_field => 'rgt',
+        :outline_number_field => nil,
         :dependent => :delete_all, # or :destroy
         :klass => self,
       }.merge(options)
@@ -37,9 +41,11 @@ module Mongoid::Acts::NestedSet
 
       unless self.is_a?(Document::ClassMethods)
         include Document
+        include OutlineNumber if outline_number_field_name
 
         field left_field_name, :type => Integer
         field right_field_name, :type => Integer
+        field outline_number_field_name if outline_number_field_name
         field :depth, :type => Integer
 
         references_many :children, :class_name => self.name, :foreign_key => parent_field_name, :inverse_of => :parent, :default_order => criteria.asc(left_field_name)
@@ -50,6 +56,8 @@ module Mongoid::Acts::NestedSet
         if accessible_attributes.blank?
           attr_protected left_field_name.intern, right_field_name.intern
         end
+
+        define_callbacks :move, :terminator => "result == false"
 
         before_create  :set_default_left_and_right
         before_save    :store_new_parent
@@ -75,7 +83,6 @@ module Mongoid::Acts::NestedSet
           where(:depth => level).asc(left_field_name)
         }
 
-        define_callbacks :move, :terminator => "result == false"
       end
     end
   end

@@ -90,6 +90,39 @@ No problem.  Simply add `acts_as_nested_set` and run:
 
 Your tree will be converted to a valid nested set.
 
+
+### Outline Numbering
+
+Mongoid Nested Set can manage outline numbers (e.g. 1.3.2) for your documents if
+you wish.  Simply add `:outline_number_field`:
+
+    acts_as_nested_set, :outline_number_field => 'number'
+
+Your documents will now include a `number` field (you can call it anything you
+wish) that will contain outline numbers.
+
+Don't like the outline numbers format?  Simply override `outline_number_seperator`,
+`build_outline_number`, or `outline_number_sequence` in your model classes.  For
+example:
+
+    class Category
+        include Mongoid::Document
+        acts_as_nested_set :scope => :root_id, :outline_number_field => 'number'
+
+        # Use a dash instead of a dot for outline numbers
+        # e.g. 1-3-2
+        def outline_number_seperator
+            '-'
+        end
+
+        # Use 0-based indexing instead of 1-based indexing
+        # e.g. 1.0
+        def outline_number_sequence(prev_siblings)
+            prev_siblings.count
+        end
+    end
+
+
 ## References
 
 You can learn more about nested sets at:

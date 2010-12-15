@@ -142,6 +142,12 @@ module Mongoid::Acts::NestedSet
       end
 
 
+      # Returns true if outline numbering is supported
+      def outline_numbering?
+        !!outline_number_field_name
+      end
+
+
       # order by left field
       def <=>(x)
         left <=> x.left

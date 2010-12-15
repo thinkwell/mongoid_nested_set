@@ -20,12 +20,13 @@ module Mongoid
   module Acts
     module NestedSet
       require 'mongoid_nested_set/base'
-      autoload :Document,   'mongoid_nested_set/document'
-      autoload :Fields,     'mongoid_nested_set/fields'
-      autoload :Rebuild,    'mongoid_nested_set/rebuild'
-      autoload :Relations,  'mongoid_nested_set/relations'
-      autoload :Update,     'mongoid_nested_set/update'
-      autoload :Validation, 'mongoid_nested_set/validation'
+      autoload :Document,      'mongoid_nested_set/document'
+      autoload :Fields,        'mongoid_nested_set/fields'
+      autoload :Rebuild,       'mongoid_nested_set/rebuild'
+      autoload :Relations,     'mongoid_nested_set/relations'
+      autoload :Update,        'mongoid_nested_set/update'
+      autoload :Validation,    'mongoid_nested_set/validation'
+      autoload :OutlineNumber, 'mongoid_nested_set/outline_number'
 
       def self.included(base)
         base.extend(Base)

@@ -17,17 +17,17 @@ describe "A Mongoid::Document" do
     nodes = {}
     # See Wikipedia for an illustration of the first tree
     # http://en.wikipedia.org/wiki/Nested_set_model#Example
-    nodes[:clothing]    = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Clothing',    'lft' =>  1, 'rgt' => 22, 'depth' => 0, 'parent_id' => nil)
-    nodes[:mens]        = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Men\'s',      'lft' =>  2, 'rgt' =>  9, 'depth' => 1, 'parent_id' => nodes[:clothing].id)
-    nodes[:suits]       = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Suits',       'lft' =>  3, 'rgt' =>  8, 'depth' => 2, 'parent_id' => nodes[:mens].id)
-    nodes[:slacks]      = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Slacks',      'lft' =>  4, 'rgt' =>  5, 'depth' => 3, 'parent_id' => nodes[:suits].id)
-    nodes[:jackets]     = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Jackets',     'lft' =>  6, 'rgt' =>  7, 'depth' => 3, 'parent_id' => nodes[:suits].id)
-    nodes[:womens]      = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Women\'s',    'lft' => 10, 'rgt' => 21, 'depth' => 1, 'parent_id' => nodes[:clothing].id)
-    nodes[:dresses]     = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Dresses',     'lft' => 11, 'rgt' => 16, 'depth' => 2, 'parent_id' => nodes[:womens].id)
-    nodes[:skirts]      = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Skirts',      'lft' => 17, 'rgt' => 18, 'depth' => 2, 'parent_id' => nodes[:womens].id)
-    nodes[:blouses]     = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Blouses',     'lft' => 19, 'rgt' => 20, 'depth' => 2, 'parent_id' => nodes[:womens].id)
-    nodes[:gowns]       = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Gowns',       'lft' => 12, 'rgt' => 13, 'depth' => 3, 'parent_id' => nodes[:dresses].id)
-    nodes[:sundress]    = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Sun Dresses', 'lft' => 14, 'rgt' => 15, 'depth' => 3, 'parent_id' => nodes[:dresses].id)
+    nodes[:clothing]    = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Clothing',    'lft' =>  1, 'rgt' => 22, 'depth' => 0, 'number' => nil,     'parent_id' => nil)
+    nodes[:mens]        = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Men\'s',      'lft' =>  2, 'rgt' =>  9, 'depth' => 1, 'number' => '1',     'parent_id' => nodes[:clothing].id)
+    nodes[:suits]       = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Suits',       'lft' =>  3, 'rgt' =>  8, 'depth' => 2, 'number' => '1.1',   'parent_id' => nodes[:mens].id)
+    nodes[:slacks]      = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Slacks',      'lft' =>  4, 'rgt' =>  5, 'depth' => 3, 'number' => '1.1.1', 'parent_id' => nodes[:suits].id)
+    nodes[:jackets]     = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Jackets',     'lft' =>  6, 'rgt' =>  7, 'depth' => 3, 'number' => '1.1.2', 'parent_id' => nodes[:suits].id)
+    nodes[:womens]      = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Women\'s',    'lft' => 10, 'rgt' => 21, 'depth' => 1, 'number' => '2',     'parent_id' => nodes[:clothing].id)
+    nodes[:dresses]     = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Dresses',     'lft' => 11, 'rgt' => 16, 'depth' => 2, 'number' => '2.1',   'parent_id' => nodes[:womens].id)
+    nodes[:skirts]      = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Skirts',      'lft' => 17, 'rgt' => 18, 'depth' => 2, 'number' => '2.2',   'parent_id' => nodes[:womens].id)
+    nodes[:blouses]     = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Blouses',     'lft' => 19, 'rgt' => 20, 'depth' => 2, 'number' => '2.3',   'parent_id' => nodes[:womens].id)
+    nodes[:gowns]       = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Gowns',       'lft' => 12, 'rgt' => 13, 'depth' => 3, 'number' => '2.1.1', 'parent_id' => nodes[:dresses].id)
+    nodes[:sundress]    = klass.new.test_set_attributes('root_id' => 1, 'name' => 'Sun Dresses', 'lft' => 14, 'rgt' => 15, 'depth' => 3, 'number' => '2.1.2', 'parent_id' => nodes[:dresses].id)
     nodes
   end
 
@@ -35,16 +35,16 @@ describe "A Mongoid::Document" do
     nodes = {}
     # See MySQL for an illustration of the second tree
     # http://dev.mysql.com/tech-resources/articles/hierarchical-data.html
-    nodes[:electronics] = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Electronics', 'lft' =>  1, 'rgt' => 20, 'depth' => 0, 'parent_id' => nil)
-    nodes[:televisions] = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Televisions', 'lft' =>  2, 'rgt' =>  9, 'depth' => 1, 'parent_id' => nodes[:electronics].id)
-    nodes[:tube]        = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Tube',        'lft' =>  3, 'rgt' =>  4, 'depth' => 2, 'parent_id' => nodes[:televisions].id)
-    nodes[:lcd]         = klass.new.test_set_attributes('root_id' => 2, 'name' => 'LCD',         'lft' =>  5, 'rgt' =>  6, 'depth' => 2, 'parent_id' => nodes[:televisions].id)
-    nodes[:plasma]      = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Plasma',      'lft' =>  7, 'rgt' =>  8, 'depth' => 2, 'parent_id' => nodes[:televisions].id)
-    nodes[:portable]    = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Portable',    'lft' => 10, 'rgt' => 19, 'depth' => 1, 'parent_id' => nodes[:electronics].id)
-    nodes[:mp3]         = klass.new.test_set_attributes('root_id' => 2, 'name' => 'MP3',         'lft' => 11, 'rgt' => 14, 'depth' => 2, 'parent_id' => nodes[:portable].id)
-    nodes[:cd]          = klass.new.test_set_attributes('root_id' => 2, 'name' => 'CD',          'lft' => 15, 'rgt' => 16, 'depth' => 2, 'parent_id' => nodes[:portable].id)
-    nodes[:radio]       = klass.new.test_set_attributes('root_id' => 2, 'name' => '2 Way Radio', 'lft' => 17, 'rgt' => 18, 'depth' => 2, 'parent_id' => nodes[:portable].id)
-    nodes[:flash]       = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Flash',       'lft' => 12, 'rgt' => 13, 'depth' => 3, 'parent_id' => nodes[:mp3].id)
+    nodes[:electronics] = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Electronics', 'lft' =>  1, 'rgt' => 20, 'depth' => 0, 'number' => nil,     'parent_id' => nil)
+    nodes[:televisions] = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Televisions', 'lft' =>  2, 'rgt' =>  9, 'depth' => 1, 'number' => '1',     'parent_id' => nodes[:electronics].id)
+    nodes[:tube]        = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Tube',        'lft' =>  3, 'rgt' =>  4, 'depth' => 2, 'number' => '1.1',   'parent_id' => nodes[:televisions].id)
+    nodes[:lcd]         = klass.new.test_set_attributes('root_id' => 2, 'name' => 'LCD',         'lft' =>  5, 'rgt' =>  6, 'depth' => 2, 'number' => '1.2',   'parent_id' => nodes[:televisions].id)
+    nodes[:plasma]      = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Plasma',      'lft' =>  7, 'rgt' =>  8, 'depth' => 2, 'number' => '1.3',   'parent_id' => nodes[:televisions].id)
+    nodes[:portable]    = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Portable',    'lft' => 10, 'rgt' => 19, 'depth' => 1, 'number' => '2',     'parent_id' => nodes[:electronics].id)
+    nodes[:mp3]         = klass.new.test_set_attributes('root_id' => 2, 'name' => 'MP3',         'lft' => 11, 'rgt' => 14, 'depth' => 2, 'number' => '2.1',   'parent_id' => nodes[:portable].id)
+    nodes[:cd]          = klass.new.test_set_attributes('root_id' => 2, 'name' => 'CD',          'lft' => 15, 'rgt' => 16, 'depth' => 2, 'number' => '2.2',   'parent_id' => nodes[:portable].id)
+    nodes[:radio]       = klass.new.test_set_attributes('root_id' => 2, 'name' => '2 Way Radio', 'lft' => 17, 'rgt' => 18, 'depth' => 2, 'number' => '2.3',   'parent_id' => nodes[:portable].id)
+    nodes[:flash]       = klass.new.test_set_attributes('root_id' => 2, 'name' => 'Flash',       'lft' => 12, 'rgt' => 13, 'depth' => 3, 'number' => '2.1.1', 'parent_id' => nodes[:mp3].id)
     nodes
   end
 
@@ -76,6 +76,7 @@ describe "A Mongoid::Document" do
     it "does not include NestedSet methods" do
       NodeWithoutNestedSet.should_not respond_to('descendant_of')
       NodeWithoutNestedSet.new.should_not respond_to('left')
+      NodeWithoutNestedSet.should_not respond_to('each_with_outline_number')
     end
   end
 
@@ -127,6 +128,10 @@ describe "A Mongoid::Document" do
 
   context "that acts as a scoped nested set" do
 
+    it "does not include outline number methods" do
+      Node.should_not respond_to('each_with_outline_number')
+    end
+
     # Adds fields
 
     it "has a left field" do
@@ -145,6 +150,10 @@ describe "A Mongoid::Document" do
       Node.should have_field('parent_id', :type => String)
       RenamedFields.should have_field('mother_id', :type => String)
       RenamedFields.should_not have_field('parent_id', :type => String)
+    end
+
+    it "does not have a number field" do
+      Node.should_not have_field('number', :type => String)
     end
 
     it "has a default left field name" do
@@ -631,4 +640,84 @@ describe "A Mongoid::Document" do
       end
     end
   end
+
+
+  context "that acts as a nested set with outline numbering" do
+
+    it "includes outline number methods" do
+      NumberingNode.should respond_to('each_with_outline_number')
+    end
+
+    it "does not have a number field" do
+      NumberingNode.should have_field('number', :type => String)
+    end
+
+    context "in a tree" do
+      before(:each) do
+        @nodes = persist_nodes(create_clothing_nodes(NumberingNode).merge(create_electronics_nodes(NumberingNode)))
+      end
+
+      it "sets the number for new child nodes" do
+        n = NumberingNode.create(:name => 'Vests', :root_id => 1, :parent_id => @nodes[:suits].id)
+        n.number.should == '1.1.3'
+      end
+
+      it "updates the number for nodes moved within the same parent" do
+        @nodes[:slacks].move_right
+        @nodes[:slacks]        .number.should == '1.1.2'
+        @nodes[:jackets].reload.number.should == '1.1.1'
+      end
+
+      it "updates the number for nodes moved to a new parent" do
+        @nodes[:slacks].move_to_child_of(@nodes[:dresses])
+        @nodes[:slacks].number.should == '2.1.3'
+      end
+
+      it "updates the number for nodes moved to root" do
+        @nodes[:suits].move_to_root
+        @nodes[:suits]         .number.should be_nil
+        @nodes[:suits]  .reload.number.should be_nil
+        @nodes[:jackets].reload.number.should == '2'
+        @nodes[:skirts] .reload.number.should == '2.2'
+      end
+
+      it "updates the number for old siblings of moved nodes" do
+        @nodes[:slacks].move_to_child_of(@nodes[:dresses])
+        @nodes[:jackets].reload.number.should == '1.1.1'
+      end
+
+      it "updates the number for new siblings of moved nodes" do
+        @nodes[:slacks].move_to_left_of(@nodes[:gowns])
+        @nodes[:gowns].reload.number.should == '2.1.2'
+      end
+
+      it "updates the number for descendants of moved nodes" do
+        @nodes[:suits].move_to_child_of(@nodes[:dresses])
+        @nodes[:suits]         .number.should == '2.1.3'
+        @nodes[:jackets].reload.number.should == '2.1.3.2'
+      end
+
+      it "updates the number for descendants of old siblings of moved nodes" do
+        @nodes[:mens].move_to_child_of(@nodes[:womens])
+        @nodes[:womens] .reload.number.should == '1'
+        @nodes[:dresses].reload.number.should == '1.1'
+      end
+
+      it "updates the number for descendants of new siblings of moved nodes" do
+        @nodes[:dresses].move_to_left_of(@nodes[:suits])
+        @nodes[:jackets].reload.number == '1.2.2'
+      end
+
+      it "updates the number for a single node" do
+        @nodes[:suits].update_attributes(NumberingNode.outline_number_field_name => '3.1')
+        @nodes[:suits].number.should == '3.1'
+        @nodes[:suits].update_outline_number
+        @nodes[:suits].number.should == '1.1'
+      end
+
+
+    end
+
+  end
+
 end

@@ -18,9 +18,15 @@ module Mongoid::Acts::NestedSet
     end
 
 
+    def outline_number_field_name
+      acts_as_nested_set_options[:outline_number_field]
+    end
+
+
     def scope_field_names
       Array(acts_as_nested_set_options[:scope])
     end
+
 
     def scope_class
       acts_as_nested_set_options[:klass]
