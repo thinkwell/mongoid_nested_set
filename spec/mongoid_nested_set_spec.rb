@@ -98,7 +98,7 @@ describe "A Mongoid::Document" do
         UnscopedNode.should be_left_and_rights_valid
 
         # left > right
-        n = UnscopedNode.new(:name => 'Test').test_set_attributes(:root_id => 1, :lft => 6, :rgt => 5, :parent_id=>@nodes[:suits].id)
+        n = UnscopedNode.new(:name => 'Test').test_set_attributes(:lft => 6, :rgt => 5, :parent_id=>@nodes[:suits].id)
         persist_nodes(n)
         UnscopedNode.should_not be_left_and_rights_valid
 
@@ -114,7 +114,7 @@ describe "A Mongoid::Document" do
       it "can detect duplicate left and right values" do
         UnscopedNode.should be_no_duplicates_for_fields
 
-        n = UnscopedNode.new(:name => 'Test').test_set_attributes(:root_id => 1, :lft => 6, :rgt => 25, :parent_id=>@nodes[:suits].id)
+        n = UnscopedNode.new(:name => 'Test').test_set_attributes(:lft => 6, :rgt => 25, :parent_id=>@nodes[:suits].id)
         persist_nodes(n)
         UnscopedNode.should_not be_no_duplicates_for_fields
 

@@ -17,6 +17,7 @@ Dir["#{File.dirname(__FILE__)}/matchers/*.rb"].each {|file| require file }
 Mongoid.configure do |config|
   name = "mongoid_nested_set_test"
   host = "localhost"
+  config.allow_dynamic_fields = false
   #config.master = Mongo::Connection.new(host, nil, :logger => Logger.new($stdout)).db(name)
   config.master = Mongo::Connection.new.db(name)
   # config.slaves = [
