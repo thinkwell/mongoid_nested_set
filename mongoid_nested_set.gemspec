@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brandon Turner"]
-  s.date = %q{2010-12-10}
+  s.date = %q{2010-12-17}
   s.description = %q{Fully featured tree implementation for Mongoid using the nested set model}
   s.email = %q{bturner@bltweb.net}
   s.extra_rdoc_files = [
@@ -27,11 +27,24 @@ Gem::Specification.new do |s|
     "VERSION",
     "lib/mongoid_nested_set.rb",
     "lib/mongoid_nested_set/base.rb",
+    "lib/mongoid_nested_set/document.rb",
+    "lib/mongoid_nested_set/fields.rb",
+    "lib/mongoid_nested_set/outline_number.rb",
+    "lib/mongoid_nested_set/rebuild.rb",
+    "lib/mongoid_nested_set/relations.rb",
+    "lib/mongoid_nested_set/remove_order_by.rb",
+    "lib/mongoid_nested_set/update.rb",
+    "lib/mongoid_nested_set/validation.rb",
     "mongoid_nested_set.gemspec",
     "spec/matchers/nestedset_pos.rb",
+    "spec/models/circle_node.rb",
     "spec/models/node.rb",
     "spec/models/node_without_nested_set.rb",
+    "spec/models/numbering_node.rb",
     "spec/models/renamed_fields.rb",
+    "spec/models/shape_node.rb",
+    "spec/models/square_node.rb",
+    "spec/models/test_document.rb",
     "spec/models/unscoped_node.rb",
     "spec/mongoid_nested_set_spec.rb",
     "spec/spec_helper.rb"
@@ -43,9 +56,14 @@ Gem::Specification.new do |s|
   s.summary = %q{Nested set based tree implementation for Mongoid}
   s.test_files = [
     "spec/matchers/nestedset_pos.rb",
+    "spec/models/circle_node.rb",
     "spec/models/node.rb",
     "spec/models/node_without_nested_set.rb",
+    "spec/models/numbering_node.rb",
     "spec/models/renamed_fields.rb",
+    "spec/models/shape_node.rb",
+    "spec/models/square_node.rb",
+    "spec/models/test_document.rb",
     "spec/models/unscoped_node.rb",
     "spec/mongoid_nested_set_spec.rb",
     "spec/spec_helper.rb"
