@@ -19,8 +19,6 @@ Jeweler::Tasks.new do |gem|
   gem.description = %Q{Fully featured tree implementation for Mongoid using the nested set model}
   gem.email = "bturner@bltweb.net"
   gem.authors = ["Brandon Turner"]
-
-  gem.add_runtime_dependency('mongoid', '>= 2.0.0.beta.20')
 end
 Jeweler::RubygemsDotOrgTasks.new
 
