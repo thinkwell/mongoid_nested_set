@@ -567,6 +567,24 @@ describe "A Mongoid::Document" do
         @nodes[:jackets].depth.should == 4
       end
 
+      it "can loop over elements starting at root with level" do
+        i = 0
+        Node.each_with_level(@nodes[:clothing].self_and_descendants) do |o, level|
+          level.should == o.depth
+          i += 1
+        end
+        i.should == 11
+      end
+
+      it "can loop over elements starting at non-root with level" do
+        i = 0
+        Node.each_with_level(@nodes[:mens].self_and_descendants) do |o, level|
+          level.should == o.depth
+          i += 1
+        end
+        i.should == 4
+      end
+
       context "with dependent=delete_all" do
         it "deletes descendants when destroyed" do
           @nodes[:mens].destroy
