@@ -585,6 +585,24 @@ describe "A Mongoid::Document" do
         i.should == 4
       end
 
+      it "can loop over elements starting at root with ancestors" do
+        i = 0
+        Node.each_with_ancestors(@nodes[:clothing].self_and_descendants) do |o, ancestors|
+          ancestors.should == o.ancestors.entries
+          i += 1
+        end
+        i.should == 11
+      end
+
+      it "can loop over elements starting at non-root with ancestors" do
+        i = 0
+        Node.each_with_ancestors(@nodes[:mens].self_and_descendants) do |o, ancestors|
+          ancestors.should == o.ancestors.entries
+          i += 1
+        end
+        i.should == 4
+      end
+
       context "with dependent=delete_all" do
         it "deletes descendants when destroyed" do
           @nodes[:mens].destroy

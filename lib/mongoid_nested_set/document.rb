@@ -59,6 +59,37 @@ module Mongoid::Acts::NestedSet
       end
 
 
+      # Iterates over tree elements with ancestors.
+      # Only accepts default ordering, ordering by an other field than lft
+      # does not work.  This is much more efficient than calling ancestors for
+      # each object because it doesn't require any additional database queries.
+      #
+      # Example:
+      #   Category.each_with_ancestors(Category.root.self_and_descendants) do |o, ancestors|
+      #
+      def each_with_ancestors(objects)
+        ancestors = nil
+        last_parent = nil
+        objects.each do |o|
+          if ancestors == nil
+            ancestors = o.root? ? [] : o.ancestors.entries
+          end
+          if ancestors.empty? || o.parent_id != ancestors.last.id
+            # we are on a new level, did we descend or ascend?
+            if ancestors.any? {|a| a.id == o.parent_id}
+              # ascend
+              ancestors.pop while (!ancestors.empty? && ancestors.last.id != o.parent_id)
+            elsif !o.root?
+              # descend
+              ancestors << last_parent
+            end
+          end
+          yield(o, ancestors)
+          last_parent = o
+        end
+      end
+
+
       # Provides a chainable relation to select all descendants of a set of records,
       # excluding the record set itself.
       # Similar to parent.descendants, except this allows you to find all descendants
