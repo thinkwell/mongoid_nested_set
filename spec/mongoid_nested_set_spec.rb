@@ -684,7 +684,7 @@ describe "A Mongoid::Document" do
       NumberingNode.should respond_to('each_with_outline_number')
     end
 
-    it "does not have a number field" do
+    it "has a number field" do
       NumberingNode.should have_field('number', :type => String)
     end
 
