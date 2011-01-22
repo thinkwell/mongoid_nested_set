@@ -26,7 +26,7 @@ Mongoid.configure do |config|
 end
 
 RSpec.configure do |config|
-  config.mock_with RR::Adapters::Rspec
+  config.mock_with :rr
   config.include(Mongoid::Acts::NestedSet::Matchers)
 
   config.before(:suite) do

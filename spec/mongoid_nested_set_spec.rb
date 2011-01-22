@@ -147,9 +147,10 @@ describe "A Mongoid::Document" do
     end
 
     it "has a parent field" do
-      Node.should have_field('parent_id', :type => String)
-      RenamedFields.should have_field('mother_id', :type => String)
-      RenamedFields.should_not have_field('parent_id', :type => String)
+      # Starting in Mongoid 2.0.rc1, all foreign keys are Objects
+      Node.should have_field('parent_id', :type => Object)
+      RenamedFields.should have_field('mother_id', :type => Object)
+      RenamedFields.should_not have_field('parent_id', :type => Object)
     end
 
     it "does not have a number field" do
