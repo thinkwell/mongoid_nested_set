@@ -48,7 +48,7 @@ module Mongoid::Acts::NestedSet
         field outline_number_field_name, :type => String if outline_number_field_name
         field :depth, :type => Integer
 
-        references_many :children, :class_name => self.name, :foreign_key => parent_field_name, :inverse_of => :parent, :default_order => criteria.asc(left_field_name)
+        references_many :children, :class_name => self.name, :foreign_key => parent_field_name, :inverse_of => :parent, :order => criteria.asc(left_field_name)
         referenced_in   :parent,   :class_name => self.name, :foreign_key => parent_field_name
 
         attr_accessor :skip_before_destroy
