@@ -22,7 +22,7 @@ Install as Gem
 
 via Gemfile
 
-    gem 'mongoid_nested_set', '0.1.0'
+    gem 'mongoid_nested_set', '0.1.3'
 
 
 ## Usage
