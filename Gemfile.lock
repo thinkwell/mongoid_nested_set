@@ -24,6 +24,7 @@ GEM
       tzinfo (~> 0.3.22)
     rake (0.9.2)
     rcov (0.9.10)
+    rdoc (3.9.4)
     remarkable (4.0.0.alpha4)
       rspec (>= 2.0.0.alpha11)
     remarkable_activemodel (4.0.0.alpha4)
@@ -51,6 +52,7 @@ DEPENDENCIES
   jeweler (~> 1.5)
   mongoid (>= 2.1.0)
   rcov
+  rdoc
   remarkable_mongoid
   rr
   rspec-core (~> 2.0)
