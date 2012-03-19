@@ -208,19 +208,19 @@ module Mongoid::Acts::NestedSet
           model.destroy
         end
       else
-        c = nested_set_scope.fuse(:where => {left_field_name => {"$gt" => left}, right_field_name => {"$lt" => right}})
+        c = nested_set_scope.merge(scope_class.where(left_field_name => {"$gt" => left}, right_field_name => {"$lt" => right}))
         scope_class.delete_all(:conditions => c.selector)
       end
 
       # update lefts and rights for remaining nodes
       diff = right - left + 1
       scope_class.collection.update(
-        nested_set_scope.fuse(:where => {left_field_name => {"$gt" => right}}).selector,
+        nested_set_scope.merge(scope_class.where(left_field_name => {"$gt" => right})).selector,
         {"$inc" => { left_field_name => -diff }},
         {:safe => true, :multi => true}
       )
       scope_class.collection.update(
-        nested_set_scope.fuse(:where => {right_field_name => {"$gt" => right}}).selector,
+        nested_set_scope.merge(scope_class.where(right_field_name => {"$gt" => right})).selector,
         {"$inc" => { right_field_name => -diff }},
         {:safe => true, :multi => true}
       )
