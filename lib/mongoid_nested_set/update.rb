@@ -144,10 +144,9 @@ module Mongoid::Acts::NestedSet
 
           updates[parent_field_name] = new_parent if self.id == node.id
 
-          node.class.collection.update(
-            {:_id => node.id },
-            {"$set" => updates},
-            {:safe => true}
+          node.class.collection.find(:_id => node.id).update(
+              {"$set" => updates},
+              {:safe => true}
           ) unless updates.empty?
         end
 
@@ -185,10 +184,9 @@ module Mongoid::Acts::NestedSet
     def update_self_and_descendants_depth
       if depth?
         scope_class.each_with_level(self_and_descendants) do |node, level|
-          node.class.collection.update(
-            {:_id => node.id},
-            {"$set" => {:depth => level}},
-            {:safe => true}
+          node.class.collection.find(:_id => node.id).update(
+              {"$set" => {:depth => level}},
+              {:safe => true}
           ) unless node.depth == level
         end
         self.reload
@@ -214,13 +212,15 @@ module Mongoid::Acts::NestedSet
 
       # update lefts and rights for remaining nodes
       diff = right - left + 1
-      scope_class.collection.update(
-        nested_set_scope.merge(scope_class.where(left_field_name => {"$gt" => right})).selector,
+      scope_class.collection.find(
+        nested_set_scope.merge(scope_class.where(left_field_name => {"$gt" => right})).selector
+      ).update(
         {"$inc" => { left_field_name => -diff }},
         {:safe => true, :multi => true}
       )
-      scope_class.collection.update(
-        nested_set_scope.merge(scope_class.where(right_field_name => {"$gt" => right})).selector,
+      scope_class.collection.find(
+        nested_set_scope.merge(scope_class.where(right_field_name => {"$gt" => right})).selector
+      ).update(
         {"$inc" => { right_field_name => -diff }},
         {:safe => true, :multi => true}
       )
