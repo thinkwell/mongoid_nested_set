@@ -10,7 +10,7 @@ module Mongoid::Acts::NestedSet
 
       scope = lambda{ |node| {} }
       if acts_as_nested_set_options[:scope]
-        scope = lambda { |node| node.nested_set_scope.scoped }
+        scope = lambda { |node| node.nested_set_scope.options.merge(node.nested_set_scope.selector) }
       end
       indices = {}
 
