@@ -27,7 +27,7 @@ module Mongoid::Acts::NestedSet
     def no_duplicates_for_fields?
       roots.group_by{|record| scope_field_names.collect{|field| record.send(field.to_sym)}}.all? do |scope, grouped_roots|
         [left_field_name, right_field_name].all? do |field|
-          grouped_roots.first.nested_set_scope.only(field).aggregate.all? {|c| c['count'] == 1}
+          grouped_roots.first.nested_set_scope.only(field).group_by {|doc| doc.send(field)}.all? {|k, v| v.size == 1}
         end
       end
     end
