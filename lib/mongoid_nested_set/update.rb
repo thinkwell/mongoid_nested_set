@@ -126,11 +126,12 @@ module Mongoid::Acts::NestedSet
                      else         target[parent_field_name]
                      end
 
-        nested_set_scope.remove_order_by.or(left_field_name => a..b).or(right_field_name => a..b).set(:depth, -1)
+        left_nodes = nested_set_scope.remove_order_by.between(left_field_name => a..b).only(:_id).map(&:_id)
+        right_nodes = nested_set_scope.remove_order_by.between(right_field_name => a..b).only(:_id).map(&:_id)
         nested_set_scope.remove_order_by.between(left_field_name => c..d).inc(left_field_name, a - c)
         nested_set_scope.remove_order_by.between(right_field_name => c..d).inc(right_field_name, a - c)
-        nested_set_scope.remove_order_by.where(:depth => -1).between(left_field_name => a..b).inc(left_field_name, d - b)
-        nested_set_scope.remove_order_by.where(:depth => -1).between(right_field_name => a..b).inc(right_field_name, d - b)
+        nested_set_scope.remove_order_by.where(:_id.in => left_nodes).inc(left_field_name, d - b)
+        nested_set_scope.remove_order_by.where(:_id.in => right_nodes).inc(right_field_name, d - b)
 
         self.set(parent_field_name, new_parent)
         self.reload_nested_set
