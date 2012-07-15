@@ -25,7 +25,7 @@ module Mongoid::Acts::NestedSet
           if Mongoid.allow_dynamic_fields ||
               fields.keys.any? { |k| k.to_s == key } ||
               associations.any? { |a| a[0].to_s == key || a[1].foreign_key.to_s == key }
-            @attributes[key] = self.typed_value_for(key, val)
+            @attributes[key] = fields[key].mongoize(val)
           end
         end
         self
