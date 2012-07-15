@@ -22,8 +22,7 @@ module Mongoid::Acts::NestedSet
         # set right
         right = (indices[scope.call(node)] += 1)
 
-        node.class.collection.update(
-          {:_id => node.id},
+        node.class.collection.find(:_id => node.id).update(
           {"$set" => {left_field_name => left, right_field_name => right}},
           {:safe => true}
         )

@@ -126,31 +126,13 @@ module Mongoid::Acts::NestedSet
                      else         target[parent_field_name]
                      end
 
-        # TODO: Worst case O(n) queries, improve?
-        # MongoDB 1.9 may allow javascript in updates: http://jira.mongodb.org/browse/SERVER-458
-        nested_set_scope.only(left_field_name, right_field_name, parent_field_name).remove_order_by.each do |node|
-          updates = {}
-          if (a..b).include? node.left
-            updates[left_field_name] = node.left + d - b
-          elsif (c..d).include? node.left
-            updates[left_field_name] = node.left + a - c
-          end
+        nested_set_scope.remove_order_by.or(left_field_name => a..b).or(right_field_name => a..b).set(:depth, -1)
+        nested_set_scope.remove_order_by.between(left_field_name => c..d).inc(left_field_name, a - c)
+        nested_set_scope.remove_order_by.between(right_field_name => c..d).inc(right_field_name, a - c)
+        nested_set_scope.remove_order_by.where(:depth => -1).between(left_field_name => a..b).inc(left_field_name, d - b)
+        nested_set_scope.remove_order_by.where(:depth => -1).between(right_field_name => a..b).inc(right_field_name, d - b)
 
-          if (a..b).include? node.right
-            updates[right_field_name] = node.right + d - b
-          elsif (c..d).include? node.right
-            updates[right_field_name] = node.right + a - c
-          end
-
-          updates[parent_field_name] = new_parent if self.id == node.id
-
-          node.class.collection.update(
-            {:_id => node.id },
-            {"$set" => updates},
-            {:safe => true}
-          ) unless updates.empty?
-        end
-
+        self.set(parent_field_name, new_parent)
         self.reload_nested_set
         self.update_self_and_descendants_depth
 
@@ -175,7 +157,7 @@ module Mongoid::Acts::NestedSet
     # Update cached level attribute
     def update_depth
       if depth?
-        self.update_attributes(:depth => level)
+        self.update_attribute(:depth, level)
       end
       self
     end
@@ -185,11 +167,7 @@ module Mongoid::Acts::NestedSet
     def update_self_and_descendants_depth
       if depth?
         scope_class.each_with_level(self_and_descendants) do |node, level|
-          node.class.collection.update(
-            {:_id => node.id},
-            {"$set" => {:depth => level}},
-            {:safe => true}
-          ) unless node.depth == level
+          node.with(:safe => true).set(:depth, level) unless node.depth == level
         end
         self.reload
       end
@@ -208,22 +186,20 @@ module Mongoid::Acts::NestedSet
           model.destroy
         end
       else
-        c = nested_set_scope.merge(scope_class.where(left_field_name => {"$gt" => left}, right_field_name => {"$lt" => right}))
-        scope_class.delete_all(:conditions => c.selector)
+        c = nested_set_scope.where(left_field_name.to_sym.gt => left, right_field_name.to_sym.lt => right)
+        scope_class.where(c.selector).delete_all
       end
 
       # update lefts and rights for remaining nodes
       diff = right - left + 1
-      scope_class.collection.update(
-        nested_set_scope.merge(scope_class.where(left_field_name => {"$gt" => right})).selector,
-        {"$inc" => { left_field_name => -diff }},
-        {:safe => true, :multi => true}
-      )
-      scope_class.collection.update(
-        nested_set_scope.merge(scope_class.where(right_field_name => {"$gt" => right})).selector,
-        {"$inc" => { right_field_name => -diff }},
-        {:safe => true, :multi => true}
-      )
+
+      scope_class.with(:safe => true).where(
+        nested_set_scope.where(left_field_name.to_sym.gt => right).selector
+      ).inc(left_field_name, -diff)
+
+      scope_class.with(:safe => true).where(
+        nested_set_scope.where(right_field_name.to_sym.gt => right).selector
+      ).inc(right_field_name, -diff)
 
       # Don't allow multiple calls to destroy to corrupt the set
       self.skip_before_destroy = true

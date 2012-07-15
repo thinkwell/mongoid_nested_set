@@ -51,11 +51,11 @@ describe "A Mongoid::Document" do
   def persist_nodes(nodes, collection_name=nil)
     nodes = {:first => nodes} unless nodes.is_a? Hash
     collection_name = nodes.values.first.class.collection_name if collection_name.nil?
-    coll = Mongoid.master[collection_name]
 
     nodes.each_value do |node|
-      # Bypass the ORM (and the nested set callbacks) and save directly with the underlying driver
-      coll.update({:_id => node.id}, node.attributes, {:upsert => true})
+      # As soon as there is no upsert callbacks set
+      # this is effectively identical to the straight driver call
+      node.with(:conllection => collection_name).upsert
       node.new_record = false
     end
     nodes
@@ -456,7 +456,7 @@ describe "A Mongoid::Document" do
       end
 
       it "cannot move a node to a non-existent target" do
-        @nodes[:mens].parent_id = BSON::ObjectId.new
+        @nodes[:mens].parent_id = Moped::BSON::ObjectId.new
         expect {
           @nodes[:mens].save
         }.to raise_error(Mongoid::Errors::MongoidError, /possible.*(exist|found)/)
