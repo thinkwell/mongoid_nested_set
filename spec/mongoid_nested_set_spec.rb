@@ -273,6 +273,7 @@ describe "A Mongoid::Document" do
         child.parent_id.should == root.id
         child.depth.should == 1
         root.reload.should have_nestedset_pos(1, 4)
+        root.depth.should == 0
       end
 
       it "can create a child node via children<<" do
@@ -283,6 +284,23 @@ describe "A Mongoid::Document" do
         child.should have_nestedset_pos(2, 3)
         child.depth.should == 1
         root.reload.should have_nestedset_pos(1, 4)
+        root.depth.should == 0
+      end
+
+      it "can create 2 level child nodes via children<<" do
+        root = Node.create(:name => 'Root Category', :root_id => 10)
+        child = Node.create(:name => 'Child Category', :root_id => 10)
+        grandchild = Node.create(:name => 'Grandchild Category', :root_id => 10)
+        root.children << child
+        child.children << grandchild
+        grandchild.parent_id.should == child.id
+        grandchild.reload.should have_nestedset_pos(3, 4)
+        grandchild.depth.should == 2
+        child.parent_id.should == root.id
+        child.reload.should have_nestedset_pos(2, 5)
+        child.depth.should == 1
+        root.reload.should have_nestedset_pos(1, 6)
+        root.depth.should == 0
       end
 
       it "can create a child node with parent pre-assigned" do
@@ -292,6 +310,7 @@ describe "A Mongoid::Document" do
         child.parent_id.should == root.id
         child.depth.should == 1
         root.reload.should have_nestedset_pos(1, 4)
+        root.depth.should == 0
       end
 
       it "can create a child node with parent id pre-assigned" do
@@ -301,6 +320,7 @@ describe "A Mongoid::Document" do
         child.parent_id.should == root.id
         child.depth.should == 1
         root.reload.should have_nestedset_pos(1, 4)
+        root.depth.should == 0
       end
 
       it "can change a new node's parent before saving" do
@@ -312,6 +332,7 @@ describe "A Mongoid::Document" do
         child.parent_id.should == root.id
         child.depth.should == 1
         root.reload.should have_nestedset_pos(1, 4)
+        root.depth.should == 0
       end
 
       it "can change a new node's parent id before saving" do
@@ -323,6 +344,7 @@ describe "A Mongoid::Document" do
         child.parent_id.should == root.id
         child.depth.should == 1
         root.reload.should have_nestedset_pos(1, 4)
+        root.depth.should == 0
       end
 
     end
@@ -476,6 +498,8 @@ describe "A Mongoid::Document" do
         @nodes[:slacks].reload.should have_nestedset_pos( 6,  7)
         @nodes[:suits] .reload.should have_nestedset_pos( 3,  8)
         @nodes[:jackets].depth.should == 3
+        @nodes[:slacks].depth.should == 3
+        @nodes[:suits].depth.should == 2
       end
 
       it "can move right" do
@@ -484,6 +508,8 @@ describe "A Mongoid::Document" do
         @nodes[:jackets].reload.should have_nestedset_pos( 4,  5)
         @nodes[:suits]  .reload.should have_nestedset_pos( 3,  8)
         @nodes[:slacks].depth.should == 3
+        @nodes[:jackets].depth.should == 3
+        @nodes[:suits].depth.should == 2
       end
 
       it "can move left of another node" do
