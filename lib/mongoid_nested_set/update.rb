@@ -105,33 +105,53 @@ module Mongoid::Acts::NestedSet
                 else raise Mongoid::Errors::MongoidError, "Position should be :child, :left, :right or :root ('#{position}' received)."
                 end
 
-        if bound > self[right_field_name]
-          bound = bound - 1
-          other_bound = self[right_field_name] + 1
-        else
-          other_bound = self[left_field_name] - 1
-        end
-
-        # there would be no change
-        return self if bound == self[right_field_name] || bound == self[left_field_name]
-
-        # we have defined the boundaries of two non-overlapping intervals,
-        # so sorting puts both the intervals and their boundaries in order
-        a, b, c, d = [self[left_field_name], self[right_field_name], bound, other_bound].sort
-
         old_parent = self[parent_field_name]
         new_parent = case position
                      when :child; target.id
                      when :root;  nil
                      else         target[parent_field_name]
                      end
+        
+        left, right     = [self[left_field_name], self[right_field_name]]
+        width, distance = [right - left + 1, bound - left]
+        edge            = bound > right ? bound - 1 : bound
 
-        left_nodes = nested_set_scope.remove_order_by.between(left_field_name => a..b).only(:_id).map(&:_id)
-        right_nodes = nested_set_scope.remove_order_by.between(right_field_name => a..b).only(:_id).map(&:_id)
-        nested_set_scope.remove_order_by.between(left_field_name => c..d).inc(left_field_name, a - c)
-        nested_set_scope.remove_order_by.between(right_field_name => c..d).inc(right_field_name, a - c)
-        nested_set_scope.remove_order_by.where(:_id.in => left_nodes).inc(left_field_name, d - b)
-        nested_set_scope.remove_order_by.where(:_id.in => right_nodes).inc(right_field_name, d - b)
+        # there would be no change
+        return self if left == edge || right == edge
+
+        # moving backwards
+        if distance < 0
+          distance -= width
+          left += width
+        end
+
+        scope_class.mongo_session.with(:safe => true) do |session|
+          collection = session[scope_class.collection_name]
+          scope = nested_set_scope.remove_order_by
+
+          # allocate space for new move
+          collection.find(
+            scope.gte(left_field_name => bound).selector
+          ).update_all("$inc" => { left_field_name => width })
+
+          collection.find(
+            scope.gte(right_field_name => bound).selector
+          ).update_all("$inc" => { right_field_name => width })
+
+          # move the nodes
+          collection.find(
+            scope.and(left_field_name => {"$gte" => left}, right_field_name => {"$lt" => left + width}).selector
+          ).update_all("$inc" => { left_field_name => distance, right_field_name => distance })
+
+          # remove the hole
+          collection.find(
+            scope.gt(left_field_name => right).selector
+          ).update_all("$inc" => { left_field_name => -width })
+
+          collection.find(
+            scope.gt(right_field_name => right).selector
+          ).update_all("$inc" => { right_field_name => -width })
+        end
 
         self.set(parent_field_name, new_parent)
         self.reload_nested_set
