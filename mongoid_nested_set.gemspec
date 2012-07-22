@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "mongoid_nested_set"
-  s.version = "0.2.0"
+  s.version = "0.2.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Brandon Turner"]
-  s.date = "2012-07-15"
+  s.date = "2012-07-17"
   s.description = "Fully featured tree implementation for Mongoid using the nested set model"
   s.email = "bturner@bltweb.net"
   s.extra_rdoc_files = [
