@@ -29,7 +29,7 @@ Dir["#{File.dirname(__FILE__)}/models/*.rb"].each {|file| require file }
 Dir["#{File.dirname(__FILE__)}/matchers/*.rb"].each {|file| require file }
 
 Mongoid.configure do |config|
-  config.connect_to("dmongoid_nested_set_test")
+  config.connect_to("mongoid_nested_set_test")
   config.allow_dynamic_fields = false
 end
 
