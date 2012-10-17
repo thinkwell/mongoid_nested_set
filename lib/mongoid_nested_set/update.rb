@@ -65,7 +65,7 @@ module Mongoid::Acts::NestedSet
 
     # on creation, set automatically lft and rgt to the end of the tree
     def set_default_left_and_right
-      maxright = nested_set_scope.max(right_field_name) || 0
+      maxright = nested_set_scope.remove_order_by.max(right_field_name) || 0
       self[left_field_name] = maxright + 1
       self[right_field_name] = maxright + 2
       self[:depth] = 0
