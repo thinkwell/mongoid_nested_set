@@ -118,6 +118,20 @@ module Mongoid::Acts::NestedSet
         set_callback :move, :after, *args, &block
       end
 
+      def associate_parents(objects)
+        if objects.all?{|o| o.respond_to?(:association)}
+          id_indexed = objects.index_by(&:id)
+          objects.each do |object|
+            if !(association = object.association(:parent)).loaded? && (parent = id_indexed[object.parent_id])
+              association.target = parent
+              association.set_inverse_instance(parent)
+            end
+          end
+        else
+          objects
+        end
+      end
+
     end
 
 

@@ -38,3 +38,9 @@ end
 
 # Enable the acts_as_nested_set method
 Mongoid::Document::ClassMethods.send(:include, Mongoid::Acts::NestedSet::Base)
+
+# Enable helper
+if defined?(ActionView)
+  require 'mongoid_nested_set/helper'
+  ActionView::Base.send :include, Mongoid::Acts::NestedSet::Helper
+end
