@@ -782,5 +782,35 @@ describe "A Mongoid::Document" do
     end
 
   end
+  
+  context "test with polymorphic model" do
+    before(:all) do
+      @node = Node.create(:name => 'Foo', :root_id => 0)
+    end
+    
+    it "should get right tree" do
+      # With this tree graph
+      # https://f.cloud.github.com/assets/5518/242221/767fbbd4-89fc-11e2-880f-a9de174d47dd.jpg
+      food = Comment.create(:commentable => @node, :body => "Food")
+        fruit = food.children.create(:commentable => @node, :body => "Fruit")
+          red = fruit.children.create(:commentable => @node, :body => "Red")
+            cherry = red.children.create(:commentable => @node, :body => "Cherry")
+          yellow = fruit.children.create(:commentable => @node, :body => "Yellow")
+            banana = yellow.children.create(:commentable => @node, :body => "Banana")
+        meat = food.children.create(:commentable => @node, :body => "Meat")
+          beef = meat.children.create(:commentable => @node, :body => "Beef")
+          pork = meat.children.create(:commentable => @node, :body => "Pork")
+      
+      [food.lft,food.rgt,food.depth].should == [1,18,0]
+      [fruit.lft,fruit.rgt,fruit.depth].should == [2,11,1]
+      [red.lft,red.rgt,red.depth].should == [3,6,2]
+      [cherry.lft,cherry.rgt,cherry.depth].should == [4,5,3]
+      [yellow.lft,yellow.rgt,yellow.depth].should == [7,10,2]
+      [banana.lft,banana.rgt,banana.depth].should == [8,9,3]
+      [meat.lft,meat.rgt,meat.depth].should == [12,17,1]
+      [beef.lft,beef.rgt,beef.depth].should == [13,14,2]
+      [pork.lft,pork.rgt,pork.depth].should == [15,16,2]
+    end
+  end
 
 end
