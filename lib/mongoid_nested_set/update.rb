@@ -153,7 +153,7 @@ module Mongoid::Acts::NestedSet
           ).update_all("$inc" => { right_field_name => -width })
         end
 
-        self.set(parent_field_name, new_parent)
+        self.mongoid_set(parent_field_name, new_parent)
         self.reload_nested_set
         self.update_self_and_descendants_depth
 
@@ -188,7 +188,7 @@ module Mongoid::Acts::NestedSet
     def update_self_and_descendants_depth
       if depth?
         scope_class.each_with_level(self_and_descendants) do |node, level|
-          node.with(:safe => true).set(:depth, level) unless node.depth == level
+          node.with(:safe => true).mongoid_set(:depth, level) unless node.depth == level
         end
         self.reload
       end
@@ -224,6 +224,16 @@ module Mongoid::Acts::NestedSet
 
       # Don't allow multiple calls to destroy to corrupt the set
       self.skip_before_destroy = true
+    end
+
+    # Compatibility wrapper for mongoid set method, should works with 3.x.x and
+    # 4.x.x versions
+    def mongoid_set(field, value)
+      if method(:set).arity == 1
+        set({field => value})
+      else
+        set(field, value)
+      end
     end
 
   end
