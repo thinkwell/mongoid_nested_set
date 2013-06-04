@@ -53,7 +53,11 @@ module Mongoid::Acts::NestedSet
 
         attr_accessor :skip_before_destroy
 
-        if accessible_attributes.blank?
+        # Rails 4 no longer uses "attr_protected" and "attr_accessible" for
+        # mass assignment control by default, but this methods can be restored 
+        # by installing 'protected_attributes' gem. So here we just check
+        # accessible_attributes method presence
+        if respond_to?(:accessible_attributes) && accessible_attributes.blank?
           attr_protected left_field_name.intern, right_field_name.intern
         end
 
