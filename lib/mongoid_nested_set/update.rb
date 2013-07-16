@@ -214,13 +214,15 @@ module Mongoid::Acts::NestedSet
       # update lefts and rights for remaining nodes
       diff = right - left + 1
 
-      scope_class.with(:safe => true).where(
+      c = scope_class.with(:safe => true).where(
         nested_set_scope.where(left_field_name.to_sym.gt => right).selector
-      ).inc(left_field_name, -diff)
+      )
+      mongoid_inc(c, left_field_name, -diff)
 
-      scope_class.with(:safe => true).where(
+      c = scope_class.with(:safe => true).where(
         nested_set_scope.where(right_field_name.to_sym.gt => right).selector
-      ).inc(right_field_name, -diff)
+      )
+      mongoid_inc(c, right_field_name, -diff)
 
       # Don't allow multiple calls to destroy to corrupt the set
       self.skip_before_destroy = true
@@ -233,6 +235,14 @@ module Mongoid::Acts::NestedSet
         set({field => value})
       else
         set(field, value)
+      end
+    end
+
+    def mongoid_inc(criteria, field, value)
+      if criteria.method(:inc).arity == 2
+        criteria.inc(field, value)        
+      else
+        criteria.inc({field => value})
       end
     end
 
