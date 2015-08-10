@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
 
   # specifiy any dependencies here; for example:
   # s.add_development_dependency "rspec"
-  s.add_runtime_dependency(%q<mongoid>, [">= 3.0.0"])
+  s.add_runtime_dependency(%q<mongoid>, [">= 4.0.0"])
 
   s.add_development_dependency(%q<rspec>, [">= 2.7.0"])
   s.add_development_dependency(%q<bundler>, [">= 1.0.21"])

@@ -18,7 +18,7 @@ if ENV['COVERAGE'] == 'yes'
   end
 
   SimpleCov.formatter = SimpleCov::Formatter::MergedFormatter
-  SimpleCov.start 
+  SimpleCov.start
 end
 
 module Mongoid::Acts::NestedSet::Matchers
@@ -30,7 +30,6 @@ Dir["#{File.dirname(__FILE__)}/matchers/*.rb"].each {|file| require file }
 
 Mongoid.configure do |config|
   config.connect_to("mongoid_nested_set_test")
-  config.allow_dynamic_fields = false
 end
 
 RSpec.configure do |config|

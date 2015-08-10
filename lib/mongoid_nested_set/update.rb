@@ -111,7 +111,7 @@ module Mongoid::Acts::NestedSet
                      when :root;  nil
                      else         target[parent_field_name]
                      end
-        
+
         left, right     = [self[left_field_name], self[right_field_name]]
         width, distance = [right - left + 1, bound - left]
         edge            = bound > right ? bound - 1 : bound
@@ -153,7 +153,7 @@ module Mongoid::Acts::NestedSet
           ).update_all("$inc" => { right_field_name => -width })
         end
 
-        self.set(parent_field_name, new_parent)
+        self.set(parent_field_name => new_parent)
         self.reload_nested_set
         self.update_self_and_descendants_depth
 
@@ -188,7 +188,7 @@ module Mongoid::Acts::NestedSet
     def update_self_and_descendants_depth
       if depth?
         scope_class.each_with_level(self_and_descendants) do |node, level|
-          node.with(:safe => true).set(:depth, level) unless node.depth == level
+          node.with(:safe => true).set(depth: level) unless node.depth == level
         end
         self.reload
       end
@@ -216,11 +216,11 @@ module Mongoid::Acts::NestedSet
 
       scope_class.with(:safe => true).where(
         nested_set_scope.where(left_field_name.to_sym.gt => right).selector
-      ).inc(left_field_name, -diff)
+      ).inc(left_field_name => -diff)
 
       scope_class.with(:safe => true).where(
         nested_set_scope.where(right_field_name.to_sym.gt => right).selector
-      ).inc(right_field_name, -diff)
+      ).inc(right_field_name => -diff)
 
       # Don't allow multiple calls to destroy to corrupt the set
       self.skip_before_destroy = true

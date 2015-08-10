@@ -478,7 +478,7 @@ describe "A Mongoid::Document" do
       end
 
       it "cannot move a node to a non-existent target" do
-        @nodes[:mens].parent_id = Moped::BSON::ObjectId.new
+        @nodes[:mens].parent_id = BSON::ObjectId.new
         expect {
           @nodes[:mens].save
         }.to raise_error(Mongoid::Errors::MongoidError, /possible.*(exist|found)/)
