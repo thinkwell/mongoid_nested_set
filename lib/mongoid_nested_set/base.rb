@@ -43,10 +43,10 @@ module Mongoid::Acts::NestedSet
         include Document
         include OutlineNumber if outline_number_field_name
 
-        field left_field_name, :type => Integer
-        field right_field_name, :type => Integer
+        field left_field_name, :type => Integer, default: 0
+        field right_field_name, :type => Integer, default: 0
         field outline_number_field_name, :type => String if outline_number_field_name
-        field :depth, :type => Integer
+        field :depth, :type => Integer, default: 0
 
         has_many   :children, :class_name => self.name, :foreign_key => parent_field_name, :inverse_of => :parent, :order => left_field_name.to_sym.asc
         belongs_to :parent,   :class_name => self.name, :foreign_key => parent_field_name
