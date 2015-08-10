@@ -53,9 +53,9 @@ module Mongoid::Acts::NestedSet
 
         attr_accessor :skip_before_destroy
 
-        if accessible_attributes.blank?
-          attr_protected left_field_name.intern, right_field_name.intern
-        end
+        # if accessible_attributes.blank?
+        #   attr_protected left_field_name.intern, right_field_name.intern
+        # end
 
         define_callbacks :move, :terminator => "result == false"
 
